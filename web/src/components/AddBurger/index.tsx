@@ -1,5 +1,6 @@
-import React from 'react'
-import { Modal } from '@material-ui/core'
+import React, { FormEvent, useState } from 'react'
+import { Modal, Switch } from '@material-ui/core'
+import { BiTask } from 'react-icons/bi'
 
 import './styles.css'
 
@@ -9,21 +10,44 @@ interface Props {
 }
 
 function AddBurger(props: Props) {
+    const [offer, setOffer] = useState(false)
+
+    function handleAddBurger(event: FormEvent) {
+        event.preventDefault()
+
+    }
+
     return (
         <Modal className="modal" open={props.isOpen} onClose={props.onClose} >
-            <form className="new-burger">
-                <h1>Novo Burger</h1>
-                <label>URL da imagem</label>
-                <input type="text" placeholder="Cole o link aqui" />
-                <label>Nome do burger</label>
-                <input type="text" placeholder="Ex: Cheese Burger" />
-                <label>Preço</label>
-                <input type="text" placeholder="R$" />
-                <label>Ingredientes do burger</label>
-                <input type="text" />
-
-                <button>
-                    <span>Adicionar burger</span>
+            <form className="new-burger" onSubmit={handleAddBurger} >
+                <fieldset>
+                    <legend>Novo Burger</legend>
+                    <label>URL da imagem</label>
+                    <input type="text" placeholder="Cole o link aqui" />
+                    <div className="input-row">
+                        <div className="input-column">
+                            <label>Nome do burger</label>
+                            <input className="burger-name" type="text" placeholder="Ex: Cheese Burger" />
+                        </div>
+                        <div className="input-column">
+                            <label>Preço</label>
+                            <input type="text" placeholder="R$" />
+                        </div>                          
+                    </div>
+                    <label>Oferta especial?</label>
+                    <Switch
+                        color='primary'
+                        value={offer}
+                        onChange={() => setOffer(!offer)}
+                    />
+                    <label>Ingredientes do burger</label>
+                    <input type="text" />
+                </fieldset>
+                <button type="submit">
+                    Adicionar burger
+                    <span>
+                        <BiTask size={20} color="white" />
+                    </span>
                 </button>
             </form>
         </Modal>
