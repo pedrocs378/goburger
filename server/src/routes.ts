@@ -12,10 +12,10 @@ routes.post('/burgers', burgersController.create)
 routes.put('/burgers/:id', burgersController.update)
 routes.delete('/burgers/:id', burgersController.delete)
 
-routes.get('/users/:id', usersController.show)
-routes.post('/users', usersController.create)
-routes.put('/users/:id', usersController.update)
+routes.post('/signup', usersController.signup)
+routes.post('/signin', usersController.signin)
 
+routes.put('/users/:id', usersController.update)
 routes.get('/users/:id/cart', cartController.show)
 routes.post('/users/:id/cart', cartController.create)
 
