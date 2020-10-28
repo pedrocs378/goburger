@@ -71,10 +71,6 @@
     transition: background 0.3s;
 }
 
-.modal .new-burger button:hover {
-    background-color: #298100;
-}
-
 .modal .new-burger button span {
     margin-top: 2px;
 }

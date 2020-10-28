@@ -7,6 +7,7 @@ import cartController from './controllers/CartController'
 const routes = Router()
 
 routes.get('/burgers', burgersController.index)
+routes.get('/burgers/:id', burgersController.show)
 routes.post('/burgers', burgersController.create)
 routes.put('/burgers/:id', burgersController.update)
 routes.delete('/burgers/:id', burgersController.delete)

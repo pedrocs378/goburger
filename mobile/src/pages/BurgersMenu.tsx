@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { StatusBar } from 'expo-status-bar';
 import {
     StyleSheet,
@@ -13,13 +13,45 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import cheese from '../assets/burgers/cheese.jpg'
 import bbq from '../assets/burgers/bbq.jpg'
 import chicken from '../assets/burgers/chicken.jpg'
+import api from '../services/api';
+
+export interface Burger {
+    id: number
+    url_image: string
+    name: string
+    price: string
+    offer: number
+    available: number
+    ingredients: string
+}
 
 export default function BurgersMenu() {
+    const [burgersWithOrfer, setBurgersWithOrfer] = useState<Burger[]>()
+    const [burgers, setBurgers] = useState<Burger[]>()
+
     const navigation = useNavigation()
 
-    function handleGoToBurgerDetail() {
-        navigation.navigate('BurgerDetail')
+    useEffect(() => {
+        api.get('burgers').then(response => {
+            const orferBurgers = response.data.filter((burger: Burger) => {
+                return (burger.offer === 1) && (burger.available === 1)
+            })
+            setBurgersWithOrfer(orferBurgers)
+
+            const resBurgers = response.data.filter((burger: Burger) => {
+                return (burger.available === 1)
+            })
+
+            setBurgers(resBurgers)
+        })
+    }, [])
+
+    function handleGoToBurgerDetail(id: number) {
+        navigation.navigate('BurgerDetail', {
+            id
+        })
     }
+
     return (
         <View style={styles.container}>
             <StatusBar translucent />
@@ -27,33 +59,55 @@ export default function BurgersMenu() {
             <ScrollView style={styles.content}>
                 <Text style={styles.offersTitle}>Ofertas Especiais</Text>
                 <ScrollView horizontal>
-                    <TouchableOpacity 
-                        style={styles.offerItem} 
-                        activeOpacity={0.8}
-                        onPress={handleGoToBurgerDetail}
-                    >
-                        <Image style={styles.offerImg} source={chicken} resizeMode="stretch" />
-                        <Text style={styles.offerTitle}>BBQ Burger</Text>
-                        <View style={styles.offerPrice}>
-                            <Text style={styles.price}>R$ 16,90</Text>
-                        </View>
-                    </TouchableOpacity>
+                    {
+                        burgersWithOrfer?.map(burger => {
+                            return (
+                                <TouchableOpacity
+                                    key={burger.id}
+                                    style={styles.offerItem}
+                                    activeOpacity={0.8}
+                                    onPress={() => handleGoToBurgerDetail(burger.id)}
+                                >
+                                    <Image 
+                                        style={styles.offerImg} 
+                                        source={{ uri: burger.url_image }} 
+                                        resizeMode="stretch" 
+                                    />
+                                    <Text style={styles.offerTitle}>{burger.name}</Text>
+                                    <View style={styles.offerPrice}>
+                                        <Text style={styles.price}>R$ {burger.price}</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            )
+                        })
+                    }
                 </ScrollView>
 
-                <TouchableOpacity 
-                    style={styles.item} 
-                    activeOpacity={0.8}
-                    onPress={handleGoToBurgerDetail}
-                >
-                    <Image style={styles.itemImg} source={cheese} resizeMode="stretch" />
-                    <View style={styles.itemPrice}>
-                        <Text style={styles.price}>R$ 16,90</Text>
-                    </View>
-                    <View style={styles.itemInfo}>
-                        <Text style={styles.itemTitle}>Cheese Burger</Text>
-                        <Text style={styles.itemDesc}>Bife de hambúrguer, Queijo, Bun, Cheddar, Alface, Tomate, Cebola Roxa</Text>
-                    </View>
-                </TouchableOpacity>
+                {
+                    burgers?.map(burger => {
+                        return (
+                            <TouchableOpacity
+                                key={burger.id}
+                                style={styles.item}
+                                activeOpacity={0.8}
+                                onPress={() => handleGoToBurgerDetail(burger.id)}
+                            >
+                                <Image 
+                                    style={styles.itemImg} 
+                                    source={{ uri: burger.url_image }} 
+                                    resizeMode="stretch" 
+                                />
+                                <View style={styles.itemPrice}>
+                                    <Text style={styles.price}>R$ {burger.price}</Text>
+                                </View>
+                                <View style={styles.itemInfo}>
+                                    <Text style={styles.itemTitle}>{burger.name}</Text>
+                                    <Text style={styles.itemDesc}>{burger.ingredients}</Text>
+                                </View>
+                            </TouchableOpacity>
+                        )
+                    })
+                }
             </ScrollView>
         </View>
     )
@@ -83,7 +137,7 @@ const styles = StyleSheet.create({
         height: '100%',
         width: '100%',
 
-        borderRadius: 8
+        borderRadius: 10
     },
     offerTitle: {
         color: 'white',
@@ -105,9 +159,9 @@ const styles = StyleSheet.create({
     },
     item: {
         height: 250,
-        marginTop: 20,
+        marginVertical: 10,
         marginHorizontal: 30,
-        borderRadius: 8,
+        borderRadius: 10,
         flexDirection: 'row',
 
         backgroundColor: 'white'
@@ -116,8 +170,8 @@ const styles = StyleSheet.create({
         height: '100%',
         width: '60%',
 
-        borderTopLeftRadius: 8,
-        borderBottomLeftRadius: 8
+        borderTopLeftRadius: 10,
+        borderBottomLeftRadius: 10
     },
     itemPrice: {
         position: 'absolute',

@@ -2,16 +2,39 @@ import React, {  useEffect, useState } from 'react'
 import { Image, Platform, StatusBar, StyleSheet, Text, View } from 'react-native'
 import { Ionicons, FontAwesome } from '@expo/vector-icons'; 
 import { TouchableOpacity } from 'react-native-gesture-handler'
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
-import chicken from '../assets/burgers/chicken.jpg'
+import { Burger } from './BurgersMenu'
+import api from '../services/api';
+
+interface BurgerDetailRouteParams {
+    id: number
+}
 
 export default function BurgerDetail() {
     const [favorite, setFavorite] = useState(false)
     const [amount, setAmount] = useState(0)
+    const [burger, setBurger] = useState<Burger>()
 
+    const route = useRoute()
     const navigation = useNavigation()
-    
+
+    const params = route.params as BurgerDetailRouteParams
+
+    useEffect(() => {
+        api.get(`burgers/${params.id}`).then(response => {
+            setBurger(response.data[0])
+        })
+    }, [params.id])
+
+    if (!burger) {
+        return (
+            <View>
+                <Text>Carregando....</Text>
+            </View>
+        )
+    }
+
     return (
         <View style={styles.container}>
             <View style={styles.header}>
@@ -22,14 +45,18 @@ export default function BurgerDetail() {
                     <FontAwesome name={favorite ? "heart" : "heart-o"} size={30} color="black" />
                 </TouchableOpacity>
             </View>
-            <Image style={styles.image} source={chicken} resizeMode="stretch" />
+            <Image
+                style={styles.image}
+                source={{ uri: burger.url_image }}
+                resizeMode="stretch"
+            />
             <View style={styles.infos}>
                 <View>
-                    <Text style={styles.title}>Chicken Burger</Text>
-                    <Text style={styles.descIngrendients}>Bife de hambúrguer, Queijo, Bun, Cheddar, Alface, Tomate, Cebola Roxa</Text>
+                    <Text style={styles.title}>{burger.name}</Text>
+                    <Text style={styles.descIngrendients}>{burger?.ingredients}</Text>
                 </View>
                 <View>
-                    <Text style={styles.price}>R$16,90</Text>
+                    <Text style={styles.price}>R$ {burger.price}</Text>
                     <Text style={styles.weight}>325g</Text>
                 </View>
             </View>
@@ -64,6 +91,7 @@ export default function BurgerDetail() {
             </TouchableOpacity>
         </View>
     )
+    
 }
 
 const styles = StyleSheet.create({
