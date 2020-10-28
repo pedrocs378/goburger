@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Feather } from '@expo/vector-icons'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 
@@ -6,12 +6,18 @@ import BurgersMenu from '../pages/BurgersMenu'
 import Favorites from '../pages/Favorites'
 import Cart from '../pages/Cart'
 import Profile from '../pages/Profile'
+import { useRoute } from '@react-navigation/native'
 
 const { Navigator, Screen } = createBottomTabNavigator()
 
 export default function TabNavigator() {
+
+    const route = useRoute()
+    const params = route.params
+
     return (
         <Navigator 
+            initialRouteName="Profile"
             tabBarOptions={{
                 activeTintColor: '#FFBA00',
                 inactiveTintColor: '#BCBCBC',
@@ -52,6 +58,7 @@ export default function TabNavigator() {
             <Screen 
                 name="Profile" 
                 component={Profile} 
+                initialParams={params}
                 options={{ 
                     title: "Perfil",
                     tabBarIcon: ({ color, size }) =>
