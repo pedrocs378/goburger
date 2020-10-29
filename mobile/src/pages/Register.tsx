@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Alert, StyleSheet, Text, View } from 'react-native'
 import { TextInput, TouchableOpacity, TouchableWithoutFeedback } from 'react-native-gesture-handler'
 import { Feather, Ionicons } from '@expo/vector-icons'
-import { useNavigation } from '@react-navigation/native'
+import { useFocusEffect, useNavigation } from '@react-navigation/native'
 
 export default function Register() {
     const [hidePassword, setHidePassword] = useState(true)
@@ -23,7 +23,7 @@ export default function Register() {
         setPassword("")
         setConfirmPassword("")
     }
-
+    
     function handleGoToRegisterAddress() {
         if (!name.trim() || !phone.trim() || !email.trim() || !password.trim()) {
             return

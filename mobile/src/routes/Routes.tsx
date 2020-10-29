@@ -9,6 +9,7 @@ import TabNavigator from './TabNavigator'
 import Login from '../pages/Login'
 import Register from '../pages/Register'
 import RegisterAddress from '../pages/RegisterAddress'
+import LoginOrProfile from '../pages/LoginOrProfile'
 
 const { Navigator, Screen } = createStackNavigator()
 
@@ -16,7 +17,7 @@ export default function Routes() {
     return (
         <NavigationContainer>
             <Navigator screenOptions={{ headerShown: false }}>
-                <Screen component={Login} name="Login" />
+                <Screen component={LoginOrProfile} name="LoginOrProfile" />
                 <Screen 
                     component={TabNavigator} 
                     name="TabNavigator" 
@@ -34,6 +35,7 @@ export default function Routes() {
                         header: () => <Header />
                     }}
                 />
+                <Screen component={Login} name="Login" />
                 <Screen 
                     component={RegisterAddress} 
                     name="RegisterAddress" 

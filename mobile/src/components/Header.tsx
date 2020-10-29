@@ -7,9 +7,7 @@ export default function Header() {
         <View style={styles.header}>
             <View />
             <Text style={styles.appTitle}>GoBurger</Text>
-            <TouchableWithoutFeedback>
-                <FontAwesome5 style={styles.buttonBurger} name="hamburger" size={24} />
-            </TouchableWithoutFeedback>
+            <FontAwesome5 style={styles.buttonBurger} name="hamburger" size={23} />
         </View>
     )
 }
@@ -23,11 +21,11 @@ const styles = StyleSheet.create({
         backgroundColor: '#FFBA00',
     },
     appTitle: {
-        fontWeight: 'bold',
-        fontSize: 24
+        fontFamily: 'Poppins_600SemiBold',
+        fontSize: 22,
     },
     buttonBurger: {
         marginRight: 20,
-        marginTop: 3
+        marginTop: 3,
     },
 })

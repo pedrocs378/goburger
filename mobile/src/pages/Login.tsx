@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
-import { Alert, StatusBar, StyleSheet, Text, View } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import { Alert, BackHandler, StatusBar, StyleSheet, Text, View } from 'react-native'
 import { TextInput, TouchableOpacity, TouchableWithoutFeedback } from 'react-native-gesture-handler'
 import { Feather } from '@expo/vector-icons'
-import { useNavigation } from '@react-navigation/native'
+import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import AsyncStorage from '@react-native-community/async-storage'
 
 import api from '../services/api'
@@ -16,6 +16,18 @@ export default function Login() {
 
     const navigation = useNavigation()
 
+    function handleRemoveData() {
+        setEmail("")
+        setPassword("")
+        setInvalid(false)
+        setHidePassword(true)
+    }
+
+    const backPressed = () => {
+        BackHandler.exitApp()
+        return true;
+    }
+
     async function handleLogin() {
         if (!email.trim() || !password.trim()) {
             setInvalid(true)
@@ -27,10 +39,9 @@ export default function Login() {
             
             AsyncStorage.setItem('userData', JSON.stringify(response.data))
             api.defaults.headers.common['Authorization'] = `bearer ${response.data.token}`
-            setEmail("")
-            setPassword("")
-            setInvalid(false)
-            navigation.navigate('TabNavigator', response.data)
+            handleRemoveData()
+
+            navigation.navigate("TabNavigator", response.data)
             
         } catch (err) {
             if (err.response && err.response.data) {
@@ -41,6 +52,18 @@ export default function Login() {
         }
 
     }
+
+    useFocusEffect(() => {
+
+        navigation.addListener("focus", () => {
+            BackHandler.addEventListener("hardwareBackPress", backPressed)
+        })
+
+        navigation.addListener("blur", () => {
+            BackHandler.removeEventListener("hardwareBackPress", backPressed)
+        })
+
+    })
 
     return (
         <View style={styles.container}>
