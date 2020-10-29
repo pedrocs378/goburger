@@ -28,27 +28,35 @@ export default {
             neighborhood
         } = req.body
 
-        getHash(password, (hash: string) => {
-            const newPassword = hash
+        const isExist = await db('users')
+            .select("email")
+            .where("users.email", '=', email)
+            .first()
 
-            const user = {
-                name,
-                email,
-                password: newPassword,
-                phone,
-                uf,
-                city,
-                street,
-                number,
-                neighborhood 
-            }
-
-            db('users')
-                .insert(user)
-                .then(_ => res.status(201).send())
-                .catch(err => res.status(500).send(err))
-        })
-
+        if (isExist) {
+            return res.status(400).send("User already exist.")
+        } else {
+            getHash(password, (hash: string) => {
+                const newPassword = hash
+    
+                const user = {
+                    name,
+                    email,
+                    password: newPassword,
+                    phone,
+                    uf,
+                    city,
+                    street,
+                    number,
+                    neighborhood 
+                }
+    
+                db('users')
+                    .insert(user)
+                    .then(_ => res.status(201).send())
+                    .catch(err => res.status(500).send(err))
+            })
+        }
     },
 
     async signin(req: Request, res: Response) {

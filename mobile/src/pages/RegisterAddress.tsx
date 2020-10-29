@@ -38,25 +38,24 @@ export default function RegisterAddress() {
         setUf("")
     }
 
-    function handleRegister() {
+    async function handleRegister() {
 
         if (!street.trim() || !neighborhood.trim() || !number.trim() || !city.trim() || !uf.trim()) {
             return
         }
         
         try {
-            api.post('signup', {
+            await api.post('signup', {
                 ...userInfo,
                 street,
                 neighborhood,
                 number,
                 uf,
                 city,
-            }).then(_ => {
-                navigation.navigate("Login")
-
-                handleRemoveData()
             })
+
+            navigation.navigate("Login")
+            handleRemoveData()
 
         } catch (err) {
             if (err.response && err.response.data) {
