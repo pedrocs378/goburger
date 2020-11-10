@@ -21,8 +21,8 @@ routes.post('/users/:id/favorites', favoritesController.create)
 routes.delete('/users/:id/favorites', favoritesController.delete)
 routes.get('/users/:userId/favorites/:burgerId', favoritesController.show)
 
-routes.put('/users/:id', usersController.update)
-routes.get('/users/:id/cart', cartController.show)
 routes.post('/users/:id/cart', cartController.create)
+routes.delete('/users/:id/cart', cartController.delete)
+routes.get('/users/:id/cart', cartController.index)
 
 export default routes

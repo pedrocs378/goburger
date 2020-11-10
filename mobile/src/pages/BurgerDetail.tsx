@@ -1,13 +1,14 @@
-import React, {  useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Image, Platform, StatusBar, StyleSheet, Text, View } from 'react-native'
 import { Ionicons, FontAwesome } from '@expo/vector-icons'; 
 import { TouchableOpacity } from 'react-native-gesture-handler'
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { connect, ConnectedProps } from 'react-redux';
 
-import { Burger } from './BurgersMenu'
 import api from '../services/api';
 import { AppState } from '../store/actions/actionTypes';
+
+import { Burger } from './BurgersMenu'
 
 const mapStateToProps = ({ user }: AppState) => {
     return {
@@ -42,7 +43,7 @@ function BurgerDetail(props: Props) {
 
     const params = route.params as BurgerDetailRouteParams
 
-    useEffect(() => {
+    useFocusEffect(() => {
         api.get(`burgers/${params.id}`).then(response => {
             setBurger(response.data[0])
         })
@@ -50,7 +51,7 @@ function BurgerDetail(props: Props) {
         api.get(`users/${props.id}/favorites/${params.id}`).then(response => {
             setFavorite(response.data.favorite)
         })
-    }, [params.id])
+    })
 
     async function handleAddOrRemoveFavoriteBurger(id: number) {
         if (favorite) {
