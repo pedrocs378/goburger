@@ -21,6 +21,7 @@ export default {
             email,
             password,
             phone,
+            cep,
             uf,
             city,
             street,
@@ -44,6 +45,7 @@ export default {
                     email,
                     password: newPassword,
                     phone,
+                    cep,
                     uf,
                     city,
                     street,
@@ -81,6 +83,7 @@ export default {
                     name: user.name,
                     email: user.email,
                     phone: user.phone,
+                    cep: user.cep,
                     uf: user.uf,
                     city: user.city,
                     street: user.street,
@@ -89,9 +92,11 @@ export default {
                 }
 
                 return res.json({
+                    id: user.id,
                     name: user.name,
                     email: user.email,
                     phone: user.phone,
+                    cep: user.cep,
                     uf: user.uf,
                     city: user.city,
                     street: user.street,

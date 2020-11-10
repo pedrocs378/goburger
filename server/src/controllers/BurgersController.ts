@@ -90,7 +90,7 @@ export default {
                 .where('burgers.id', '=', id)
                 .delete()
 
-            return res.status(200).send('Deleted')
+            return res.status(200).send()
         } catch (err) {
             return res.status(400).json({
                 error: 'Unexpected error while deleting a burger'

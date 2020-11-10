@@ -3,6 +3,7 @@ import { Alert, StyleSheet, Text, View } from 'react-native'
 import { TextInput, TouchableOpacity, TouchableWithoutFeedback } from 'react-native-gesture-handler'
 import { Feather, Ionicons } from '@expo/vector-icons'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
+import { TextInputMask } from 'react-native-masked-text'
 
 export default function Register() {
     const [hidePassword, setHidePassword] = useState(true)
@@ -76,8 +77,9 @@ export default function Register() {
                     value={name}
                     onChangeText={text => setName(text)}
                 />
-                <TextInput
+                <TextInputMask
                     style={[styles.input, styles.inputText]}
+                    type={"cel-phone"}
                     placeholder="Celular"
                     textContentType="telephoneNumber"
                     keyboardType="phone-pad"

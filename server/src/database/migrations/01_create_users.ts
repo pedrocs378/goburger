@@ -7,6 +7,7 @@ export async function up(knex: Knex) {
         table.string('email').unique().notNullable()
         table.string('password').notNullable()
         table.string('phone').unique().notNullable()
+        table.string('cep').notNullable()
         table.string('uf').notNullable()
         table.string('city').notNullable()
         table.string('street').notNullable()

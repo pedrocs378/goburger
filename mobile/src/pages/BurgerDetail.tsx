@@ -3,15 +3,36 @@ import { Image, Platform, StatusBar, StyleSheet, Text, View } from 'react-native
 import { Ionicons, FontAwesome } from '@expo/vector-icons'; 
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { connect, ConnectedProps } from 'react-redux';
 
 import { Burger } from './BurgersMenu'
 import api from '../services/api';
+import { AppState } from '../store/actions/actionTypes';
+
+const mapStateToProps = ({ user }: AppState) => {
+    return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        uf: user.uf,
+        cep: user.cep,
+        city: user.city,
+        street: user.street,
+        number: user.number,
+        neighborhood: user.neighborhood,
+    }
+}
+
+const connector = connect(mapStateToProps)
+
+type Props = ConnectedProps<typeof connector>
 
 interface BurgerDetailRouteParams {
     id: number
 }
 
-export default function BurgerDetail() {
+function BurgerDetail(props: Props) {
     const [favorite, setFavorite] = useState(false)
     const [amount, setAmount] = useState(0)
     const [burger, setBurger] = useState<Burger>()
@@ -25,7 +46,31 @@ export default function BurgerDetail() {
         api.get(`burgers/${params.id}`).then(response => {
             setBurger(response.data[0])
         })
+
+        api.get(`users/${props.id}/favorites/${params.id}`).then(response => {
+            setFavorite(response.data.favorite)
+        })
     }, [params.id])
+
+    async function handleAddOrRemoveFavoriteBurger(id: number) {
+        if (favorite) {
+            await api
+                .delete(`users/${props.id}/favorites`, {
+                    data: {
+                        burger_id: id
+                    }
+                })
+
+            setFavorite(!favorite)
+        } else {
+            await api
+                .post(`users/${props.id}/favorites`, {
+                    burger_id: id
+                })
+
+            setFavorite(!favorite)
+        }
+    }
 
     if (!burger) {
         return (
@@ -41,7 +86,7 @@ export default function BurgerDetail() {
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Ionicons name="ios-arrow-back" size={35} color="black" />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => setFavorite(!favorite)}>
+                <TouchableOpacity onPress={() => handleAddOrRemoveFavoriteBurger(params.id)}>
                     <FontAwesome name={favorite ? "heart" : "heart-o"} size={30} color="black" />
                 </TouchableOpacity>
             </View>
@@ -202,3 +247,5 @@ const styles = StyleSheet.create({
     
     
 })
+
+export default connector(BurgerDetail)

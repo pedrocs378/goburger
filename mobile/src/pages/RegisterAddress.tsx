@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { Alert, StyleSheet, Text, View } from 'react-native'
+import { TextInputMask } from 'react-native-masked-text'
 import { TextInput, TouchableOpacity } from 'react-native-gesture-handler'
 import { Ionicons } from '@expo/vector-icons'
 import { useNavigation, useRoute } from '@react-navigation/native'
+
+
 import api from '../services/api'
 
 interface UserParams {
@@ -19,6 +22,7 @@ export default function RegisterAddress() {
     const [number, setNumber] = useState("")
     const [city, setCity] = useState("")
     const [uf, setUf] = useState("")
+    const [cep, setCEP] = useState("")
 
     const navigation = useNavigation()
 
@@ -36,11 +40,12 @@ export default function RegisterAddress() {
         setNumber("")
         setCity("")
         setUf("")
+        setCEP("")
     }
 
     async function handleRegister() {
 
-        if (!street.trim() || !neighborhood.trim() || !number.trim() || !city.trim() || !uf.trim()) {
+        if (!street.trim() || !neighborhood.trim() || !number.trim() || !city.trim() || !uf.trim() || !cep.trim()) {
             return
         }
         
@@ -48,6 +53,7 @@ export default function RegisterAddress() {
             await api.post('signup', {
                 ...userInfo,
                 street,
+                cep,
                 neighborhood,
                 number,
                 uf,
@@ -82,7 +88,15 @@ export default function RegisterAddress() {
             </TouchableOpacity>
             <View style={styles.content}>
                 <Text style={styles.subtitle}>Insira os dados do seu endereço</Text>
-
+                <TextInputMask
+                    style={[styles.input, styles.inputText]}
+                    placeholder="CEP"
+                    type={"zip-code"}
+                    textContentType="postalCode"
+                    keyboardType="numeric"
+                    value={cep}
+                    onChangeText={text => setCEP(text)}
+                />
                 <TextInput
                     style={[styles.input, styles.inputText]}
                     placeholder="Endereço"

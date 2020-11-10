@@ -5,9 +5,11 @@ import {
   Poppins_600SemiBold,
   useFonts
 } from '@expo-google-fonts/poppins'
-
-import Routes from './src/routes/Routes';
 import { AppLoading } from 'expo';
+import { Provider } from 'react-redux';
+
+import { store } from './src/store/storeConfig'
+import Routes from './src/routes/Routes';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -20,5 +22,9 @@ export default function App() {
     return <AppLoading />
   }
 
-  return <Routes />
+  return (
+    <Provider store={store} >
+      <Routes />
+    </Provider>
+  )
 }

@@ -1,13 +1,29 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Alert, BackHandler, StatusBar, StyleSheet, Text, View } from 'react-native'
 import { TextInput, TouchableOpacity, TouchableWithoutFeedback } from 'react-native-gesture-handler'
 import { Feather } from '@expo/vector-icons'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import AsyncStorage from '@react-native-community/async-storage'
+import { connect, ConnectedProps, Provider } from 'react-redux'
+import { Action } from 'redux'
+import { ThunkDispatch } from 'redux-thunk'
 
 import api from '../services/api'
+import { RootState } from '../store/storeConfig'
+import { login } from '../store/actions/actionUser'
+import { User } from '../store/actions/actionTypes'
 
-export default function Login() {
+const mapDispatchToProps = (dispatch: ThunkDispatch<RootState, unknown, Action<string>>) => {
+    return {
+        onLogin: (user: User) => dispatch(login(user))
+    }
+}
+
+const connector = connect(null, mapDispatchToProps)
+
+type Props = ConnectedProps<typeof connector>
+
+function Login(props: Props) {
     const [hidePassword, setHidePassword] = useState(true)
 
     const [email, setEmail] = useState("")
@@ -37,6 +53,7 @@ export default function Login() {
         try {
             const response = await api.post('signin', { email, password })
             
+            props.onLogin(response.data)
             AsyncStorage.setItem('userData', JSON.stringify(response.data))
             api.defaults.headers.common['Authorization'] = `bearer ${response.data.token}`
             handleRemoveData()
@@ -183,3 +200,5 @@ const styles = StyleSheet.create({
         marginTop: 20
     }
 })
+
+export default connector(Login)

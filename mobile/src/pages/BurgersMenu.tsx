@@ -10,22 +10,41 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
-import cheese from '../assets/burgers/cheese.jpg'
-import bbq from '../assets/burgers/bbq.jpg'
-import chicken from '../assets/burgers/chicken.jpg'
 import api from '../services/api';
+import BurgerItem from '../components/BurgerItem';
+import { AppState } from '../store/actions/actionTypes';
+import { connect, ConnectedProps } from 'react-redux';
+
+const mapStateToProps = ({ user }: AppState) => {
+    return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        uf: user.uf,
+        cep: user.cep,
+        city: user.city,
+        street: user.street,
+        number: user.number,
+        neighborhood: user.neighborhood,
+    }
+}
+
+const connector = connect(mapStateToProps)
+
+type Props = ConnectedProps<typeof connector>
 
 export interface Burger {
     id: number
     url_image: string
     name: string
     price: string
-    offer: number
-    available: number
+    offer?: number
+    available?: number
     ingredients: string
 }
 
-export default function BurgersMenu() {
+function BurgersMenu(props: Props) {
     const [burgersWithOrfer, setBurgersWithOrfer] = useState<Burger[]>()
     const [burgers, setBurgers] = useState<Burger[]>()
 
@@ -86,25 +105,10 @@ export default function BurgersMenu() {
                 {
                     burgers?.map(burger => {
                         return (
-                            <TouchableOpacity
+                            <BurgerItem
                                 key={burger.id}
-                                style={styles.item}
-                                activeOpacity={0.8}
-                                onPress={() => handleGoToBurgerDetail(burger.id)}
-                            >
-                                <Image 
-                                    style={styles.itemImg} 
-                                    source={{ uri: burger.url_image }} 
-                                    resizeMode="stretch" 
-                                />
-                                <View style={styles.itemPrice}>
-                                    <Text style={styles.price}>R$ {burger.price}</Text>
-                                </View>
-                                <View style={styles.itemInfo}>
-                                    <Text style={styles.itemTitle}>{burger.name}</Text>
-                                    <Text style={styles.itemDesc}>{burger.ingredients}</Text>
-                                </View>
-                            </TouchableOpacity>
+                                burger={burger}
+                            />
                         )
                     })
                 }
@@ -205,3 +209,5 @@ const styles = StyleSheet.create({
         color: '#6E6E6E'
     }
 });
+
+export default connector(BurgersMenu)

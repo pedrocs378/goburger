@@ -3,28 +3,39 @@ import React from 'react'
 import { Image, StyleSheet, Text, View } from 'react-native'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 
-import cheese from '../assets/burgers/cheese.jpg'
+import { Burger } from '../pages/BurgersMenu'
 
-export default function BurgerItem() {
+interface BurgerItemProps {
+    burger: Burger
+}
+
+export default function BurgerItem({ burger }: BurgerItemProps) {
 
     const navigation = useNavigation()
 
-    function handleGoToBurgerDetail() {
-        navigation.navigate('BurgerDetail')
+    function handleGoToBurgerDetail(id: number) {
+        navigation.navigate('BurgerDetail', {
+            id
+        })
     }
+
     return (
         <TouchableOpacity
             style={styles.item}
             activeOpacity={0.8}
-            onPress={handleGoToBurgerDetail}
+            onPress={() => handleGoToBurgerDetail(burger.id)}
         >
-            <Image style={styles.itemImg} source={cheese} resizeMode="stretch" />
+            <Image 
+                style={styles.itemImg} 
+                source={{ uri: burger.url_image }} 
+                resizeMode="stretch" 
+            />
             <View style={styles.itemPrice}>
-                <Text style={styles.price}>R$ 16,90</Text>
+                <Text style={styles.price}>R$ {burger.price}</Text>
             </View>
             <View style={styles.itemInfo}>
-                <Text style={styles.itemTitle}>Cheese Burger</Text>
-                <Text style={styles.itemDesc}>Bife de hambúrguer, Queijo, Bun, Cheddar, Alface, Tomate, Cebola Roxa</Text>
+                <Text style={styles.itemTitle}>{burger.name}</Text>
+                <Text style={styles.itemDesc}>{burger.ingredients}</Text>
             </View>
         </TouchableOpacity>
 
