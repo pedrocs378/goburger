@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Image, Platform, StatusBar, StyleSheet, Text, View } from 'react-native'
+import { Alert, Image, Platform, StatusBar, StyleSheet, Text, View } from 'react-native'
 import { Ionicons, FontAwesome } from '@expo/vector-icons'; 
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
@@ -73,6 +73,27 @@ function BurgerDetail(props: Props) {
         }
     }
 
+    async function handleAddBurgerToCart(id: number) {
+        if (amount === 0) {
+            return
+        }
+
+        try {
+            await api.post(`users/${props.id}/cart`, {
+                burger_id: id,
+                amount,
+                price: Number(burger?.price.replace(',', '.')),
+                discount: 0,
+                delivery_fee: 0
+            })
+
+            Alert.alert("Carrinho", "Burger adicionado ao carrinho")
+
+        } catch(err) {
+            Alert.alert("Erro", `Erro:\n ${err}`)
+        }
+    }
+
     if (!burger) {
         return (
             <View>
@@ -132,7 +153,11 @@ function BurgerDetail(props: Props) {
                     </TouchableOpacity>
                 </View>
             </View>
-            <TouchableOpacity style={styles.descButton} activeOpacity={0.8}>
+            <TouchableOpacity 
+                style={styles.descButton} 
+                activeOpacity={0.8} 
+                onPress={() => handleAddBurgerToCart(burger.id)}
+            >
                 <Text style={styles.descButtonText}>Adicionar ao carrinho</Text>
             </TouchableOpacity>
         </View>

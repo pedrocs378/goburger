@@ -1,100 +1,151 @@
-import React, { useEffect, useState } from 'react'
-import { Linking, StyleSheet, Text, View } from 'react-native'
+import React, { useCallback, useState } from 'react'
+import { Linking, StyleSheet, Text, View, RefreshControl } from 'react-native'
 import { ScrollView, TextInput, TouchableOpacity } from 'react-native-gesture-handler'
 import { Feather, FontAwesome5, Ionicons } from '@expo/vector-icons'; 
 import RNPickerSelect from 'react-native-picker-select';
+import { connect, ConnectedProps } from 'react-redux';
+
+import api from '../services/api';
+import { AppState } from '../store/actions/actionTypes';
+
+const mapStateToProps = ({ user }: AppState) => {
+    return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        uf: user.uf,
+        cep: user.cep,
+        city: user.city,
+        street: user.street,
+        number: user.number,
+        neighborhood: user.neighborhood,
+    }
+}
+
+const connector = connect(mapStateToProps)
+
+type Props = ConnectedProps<typeof connector>
 
 interface Cart {
     id: number,
-    title: string
+    name: string
     ingredients: string
     amount: number
-    value: string
+    price: string
 }
 
-export default function Cart() {
+interface Order {
+    id: number
+    discount: number
+    delivery_fee: number
+    subtotal: number
+    total: number
+}
+
+const wait = (timeout: number) => {
+    return new Promise(resolve => {
+        setTimeout(resolve, timeout);
+    });
+}
+
+const initialStateOrder: Order = {
+    id: -1,
+    delivery_fee: 0,
+    discount: 0,
+    subtotal: 0,
+    total: 0
+}
+
+function Cart(props: Props) {
     const [paymentType, setPaymentType] = useState('')
     const [address, setAddress] = useState('')
     const [products, setProducts] = useState<Cart[]>([])
+    const [order, setOrder] = useState<Order>(initialStateOrder)
     const [moneyBack, setMoneyBack] = useState("")
+    const [refreshing, setRefreshing] = useState(false)
 
-    useEffect(() => {
-        setProducts([
-            {
-                id: Math.random(),
-                title: 'BBQ Burger',
-                ingredients: 'Hamburger, Alface, Tomate, Queijo',
-                amount: 2,
-                value: '16.90'
-            },
-            {
-                id: Math.random(),
-                title: 'BBQ Burger',
-                ingredients: 'Hamburger, Alface, Tomate, Queijo',
-                amount: 1,
-                value: '18.90'
-            },
-            {
-                id: Math.random(),
-                title: 'BBQ Burger',
-                ingredients: 'Hamburger, Alface, Tomate, Queijo',
-                amount: 3,
-                value: '12.90'
-            },
-        ])
+    const handleGetItensCart = useCallback(() => {
+        api.get(`users/${props.id}/cart`).then(response => {
+            if (response.data.cart.length > 0 && response.data.order.length > 0) {
+                setProducts(response.data.cart)
+                setOrder(response.data.order[0])
+            } else {
+                setProducts([])
+                setOrder(initialStateOrder)
+            }
+        })
     }, [])
 
     function handleWhatsApp() {
-        let message = "Meu pedido *2378*"
+        let message = `Meu pedido *${order.id}*`
 
         products.forEach(product => {
-            message += `\n\n*${product.title}*\n`
+            message += `\n\n*${product.name}*\n`
             message += `Ingredientes: ${product.ingredients}\n`
             message += `Quantidade: ${product.amount}\n\n`
-            message += `Valor: R$ ${product.value}\n\n`
+            message += `Valor: R$ ${product.price}\n\n`
             message += `-------------------------\n`
         })
 
-        message += `*Formas de pagamento:* ${paymentType}\n`
+        message += `*Forma de pagamento:* ${paymentType}\n`
         message += `-------------------------\n`
         message += `*Entregar em:* ${address}\n`
         message += `-------------------------\n`
-        message += `*Subtotal:* R$ ${handleCalculateSubTotalValue()}\n`
-        message += `*Desconto:* R$ 0.00\n`
-        message += `*Taxa de entrega:* R$ 2.00\n`
-        message += `*Valor Total:* R$ ${Number(handleCalculateSubTotalValue()) + 2}\n`
-        message += `*Troco para:* R$ ${Number(moneyBack).toFixed(2)}\n\n`
+        message += `*Subtotal:* R$ ${handleConvertToBRL(order.subtotal)}\n`
+        message += `*Desconto:* R$ ${handleConvertToBRL(order.discount)}\n`
+        message += `*Taxa de entrega:* ${handleConvertToBRL(order.delivery_fee)}\n`
+        message += `*Valor Total:* R$ ${handleConvertToBRL(order.total)}\n`
+        message += `*Troco para:* R$ ${handleConvertToBRL(Number(moneyBack))}\n\n`
         message += 'Obrigado!'
 
         Linking.openURL(`whatsapp://send?phone=${"+5518991618592"}&text=${message}`)
     }
 
-    function handleCalculateSubTotalValue() {
-        let value = 0
+    function handleConvertToBRL(value: number) {
+        return value.toFixed(2).replace('.', ',')
+    }
 
-        products.forEach(product => {
-            value += Number(product.value)
+    async function handleRemoveBurgerCart(id: number) {
+        await api.delete(`users/${props.id}/cart`, {
+            data: {
+                cart_id: id
+            }
         })
 
-        return value.toFixed(2)
+        handleGetItensCart()
     }
 
-    function handleCalculateTotalValue() {
+    function handleRefresh() {
+        setRefreshing(true)
+
+        handleGetItensCart()
+        wait(1000).then(() => setRefreshing(false));
 
     }
 
-    if (products?.length === 0) {
+    if (products.length === 0 && order.id === -1) {
         return (
-            <View style={styles.cartEmptyContent}>
-                <Text style={styles.cartEmpty}>
-                    Não há produtos dentro do carrinho.
-                </Text>
-            </View>
+            <ScrollView 
+                style={styles.container}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
+            >
+                <View style={styles.cartEmptyContent}> 
+                    <Ionicons name="ios-arrow-down" size={30} color="#d6d5d5" />
+                    <Text style={styles.cartEmpty}>
+                        Não há produtos dentro do carrinho.
+                    </Text>
+                </View>
+            </ScrollView>
         )
     }
 
     return (
-        <ScrollView style={styles.container}>
+        <ScrollView 
+            style={styles.container}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
+        >
+            
             <Text style={styles.subtitle}>Resumo dos pedidos</Text>
             {
                 products.map(product => {
@@ -102,7 +153,7 @@ export default function Cart() {
                         <View key={product.id} style={styles.cardOrder}>
                             <View>
                                 <Text style={[styles.cardText, styles.cardTitle]}>
-                                    {product.title}
+                                    {product.name}
                                 </Text>
                                 <Text style={[styles.cardText, styles.cardIngredients]}>
                                     {product.ingredients}
@@ -111,10 +162,13 @@ export default function Cart() {
                                     <Text style={styles.strong}> {product.amount}</Text>
                                 </Text>
                                 <Text style={styles.cardText}>Valor:
-                                    <Text style={styles.strong}> R$ {product.value}</Text>
+                                    <Text style={styles.strong}> R$ {product.price}</Text>
                                 </Text>
                             </View>
-                            <TouchableOpacity style={styles.trashButton}>
+                            <TouchableOpacity 
+                                style={styles.trashButton} 
+                                onPress={() => handleRemoveBurgerCart(product.id)}
+                            >
                                 <Feather name="trash-2" size={25} />
                             </TouchableOpacity>
                         </View>
@@ -142,10 +196,10 @@ export default function Cart() {
                 onValueChange={value => setAddress(value)}
                 value={address}
                 items={[
-                    { label: 'Endereco 1', value: 'address1' },
-                    { label: 'Endereco 2', value: 'address2' },
-                    { label: 'Endereco 3', value: 'address3' },
-                    { label: 'Endereco 4', value: 'address4' },
+                    { 
+                        label: `${props.street}, ${props.number}, ${props.neighborhood} - ${props.city}/${props.uf}`,
+                        value: `${props.street}, ${props.number}, ${props.neighborhood} - ${props.city}/${props.uf}` 
+                    }
                 ]}
             />
             <Text style={styles.subtitle}>Forma de pagamento</Text> 
@@ -169,13 +223,13 @@ export default function Cart() {
                 onValueChange={value => setPaymentType(value)}
                 value={paymentType}
                 items={[
-                    { label: 'Dinheiro', value: 'money' },
-                    { label: 'Crédito', value: 'creditCard' },
-                    { label: 'Débito', value: 'debitCard' },
-                    { label: 'Ticket', value: 'ticket' },
+                    { label: 'Dinheiro', value: 'Dinheiro' },
+                    { label: 'Crédito', value: 'Crédito' },
+                    { label: 'Débito', value: 'Débito' },
+                    { label: 'Ticket', value: 'Ticket' },
                 ]}
             />
-            <View style={paymentType === "money" ? {display: 'flex'} : {display: 'none'}}>
+            <View style={paymentType === "Dinheiro" ? {display: 'flex'} : {display: 'none'}}>
                 <Text style={styles.subtitle}>Troco para?</Text> 
                 <TextInput 
                     style={styles.input}
@@ -185,12 +239,15 @@ export default function Cart() {
                 />
             </View>
             <View style={styles.infoPrices}>
-                <Text style={styles.priceText}>Subtotal: <Text style={styles.price}>R$ {handleCalculateSubTotalValue()}</Text></Text>
-                <Text style={styles.priceText}>Desconto: <Text style={styles.price}>R$ 0,00</Text></Text>
-                <Text style={styles.priceText}>Taxa de Entrega: <Text style={styles.price}>R$ 2,00</Text></Text>
-                <Text style={styles.priceText}>Total: <Text style={styles.price}>R$ 55,00</Text></Text>
+                <Text style={styles.priceText}>Subtotal: <Text style={styles.price}>R$ {handleConvertToBRL(order.subtotal)}</Text></Text>
+                <Text style={styles.priceText}>Desconto: <Text style={styles.price}>R$ {handleConvertToBRL(order.discount)}</Text></Text>
+                <Text style={styles.priceText}>Taxa de Entrega: <Text style={styles.price}>R$ {handleConvertToBRL(order.delivery_fee)}</Text></Text>
+                <Text style={styles.priceText}>Total: <Text style={styles.price}>R$ {handleConvertToBRL(order.total)}</Text></Text>
             </View>
-            <TouchableOpacity style={styles.button} onPress={handleWhatsApp}>
+            <TouchableOpacity
+                style={styles.button} 
+                onPress={handleWhatsApp}
+            >
                 <FontAwesome5 name="whatsapp" size={25} color="white" />
                 <Text style={styles.buttonText}>Enviar pedido</Text>
             </TouchableOpacity>
@@ -204,13 +261,15 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
     },
     cartEmptyContent: {
-        flex: 1,
+        height: 100,
+        paddingVertical: 5,
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'space-between',
     },
     cartEmpty: {
         fontFamily: 'Poppins_600SemiBold',
-        fontSize: 18
+        fontSize: 18,
+    
     },
     subtitle: {
         fontFamily: 'Poppins_600SemiBold',
@@ -278,3 +337,5 @@ const styles = StyleSheet.create({
         marginLeft: 5
     }
 })
+
+export default connector(Cart)

@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, Alert, BackHandler, Image, StyleSheet, Text, View } from 'react-native'
+import React, { useEffect } from 'react'
+import { ActivityIndicator, Alert, BackHandler, Image, Modal, StyleSheet, Text, View } from 'react-native'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import { Feather } from '@expo/vector-icons'
-import { useNavigation, useRoute } from '@react-navigation/native'
+import { useNavigation } from '@react-navigation/native'
 import AsyncStorage from '@react-native-community/async-storage'
 import { Action } from 'redux'
 import { ThunkDispatch } from 'redux-thunk'
 
-import { AppState, User } from '../store/actions/actionTypes'
+import { AppState } from '../store/actions/actionTypes'
 import { logout } from '../store/actions/actionUser'
 import api from '../services/api'
 import { RootState } from '../store/storeConfig'
@@ -84,7 +84,8 @@ function Profile(props: Props) {
 
     return (
         <View style={styles.container}>
-            <View style={styles.content}>
+            
+            <View>
                 <View style={styles.userContainer}>
                     <Image 
                         style={styles.profileImg}
@@ -105,14 +106,23 @@ function Profile(props: Props) {
                     <Text style={styles.addressText}>{props.city} / {props.uf}</Text>
                 </View>
             </View>
-            <TouchableOpacity
-                style={styles.logoutButton}
-                activeOpacity={0.8}
-                onPress={handleLogout}
-            >
-                <Feather name="log-out" size={25} />
-                <Text style={styles.logoutText}>Sair</Text>
-            </TouchableOpacity>
+            <View style={styles.buttonsContainer}>
+                <TouchableOpacity
+                    style={styles.button}
+                    activeOpacity={0.8}
+                >
+                    <Feather name="edit" size={25} />
+                    <Text style={styles.buttonText}>Editar perfil</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.button}
+                    activeOpacity={0.8}
+                    onPress={handleLogout}
+                >
+                    <Feather name="log-out" size={25} />
+                    <Text style={styles.buttonText}>Sair</Text>
+                </TouchableOpacity>
+            </View>
         </View>
     )
 }
@@ -121,9 +131,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'space-between'
-    },
-    content: {
-        
     },
     userContainer: {
         marginTop: 20,
@@ -160,17 +167,21 @@ const styles = StyleSheet.create({
     strong: {
         fontFamily: 'Poppins_600SemiBold',
     },
-    logoutButton: {
+    buttonsContainer: {
+        flexDirection: "row",
+        justifyContent: 'space-around',
+        marginBottom: 10,
+    },
+    button: {
         flexDirection: 'row',
         backgroundColor: '#FFBA00',
         paddingVertical: 15,
+        paddingHorizontal: 50,
         alignItems: 'center',
         justifyContent: 'center',
-        marginHorizontal: 20,
-        marginBottom: 10,
         borderRadius: 8
     },
-    logoutText: {
+    buttonText: {
         fontFamily: 'Poppins_600SemiBold',
         marginLeft: 6,
         fontSize: 17

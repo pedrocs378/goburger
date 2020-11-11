@@ -17,7 +17,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: 24,
-        paddingTop: 40,
+        paddingTop: 30,
         backgroundColor: '#FFBA00',
     },
     appTitle: {
