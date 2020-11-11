@@ -6,12 +6,14 @@ import { useNavigation } from '@react-navigation/native'
 import AsyncStorage from '@react-native-community/async-storage'
 import { Action } from 'redux'
 import { ThunkDispatch } from 'redux-thunk'
+import { connect, ConnectedProps } from 'react-redux'
 
 import { AppState } from '../store/actions/actionTypes'
 import { logout } from '../store/actions/actionUser'
-import api from '../services/api'
 import { RootState } from '../store/storeConfig'
-import { connect, ConnectedProps } from 'react-redux'
+import api from '../services/api'
+
+import userImg from '../assets/user.png'
 
 const mapStateToProps = ({ user }: AppState) => {
     return {
@@ -89,9 +91,7 @@ function Profile(props: Props) {
                 <View style={styles.userContainer}>
                     <Image 
                         style={styles.profileImg}
-                        source={{
-                            uri: 'https://avatars1.githubusercontent.com/u/53832604?s=460&u=c7f5ef19cc8de6de885a928cd96ced29b19461f3&v=4'
-                        }}
+                        source={userImg}
                     />
                     <Text style={styles.username}>{props.name}</Text>
                     <View style={styles.phoneContainer}>

@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react'
-import { Linking, StyleSheet, Text, View, RefreshControl } from 'react-native'
+import { Linking, StyleSheet, Text, View, RefreshControl, Alert } from 'react-native'
 import { ScrollView, TextInput, TouchableOpacity } from 'react-native-gesture-handler'
 import { Feather, FontAwesome5, Ionicons } from '@expo/vector-icons'; 
 import RNPickerSelect from 'react-native-picker-select';
@@ -7,6 +7,7 @@ import { connect, ConnectedProps } from 'react-redux';
 
 import api from '../services/api';
 import { AppState } from '../store/actions/actionTypes';
+import { useFocusEffect } from '@react-navigation/native';
 
 const mapStateToProps = ({ user }: AppState) => {
     return {
@@ -45,7 +46,7 @@ interface Order {
 
 const wait = (timeout: number) => {
     return new Promise(resolve => {
-        setTimeout(resolve, timeout);
+        setTimeout(resolve, timeout)
     });
 }
 
@@ -64,6 +65,8 @@ function Cart(props: Props) {
     const [order, setOrder] = useState<Order>(initialStateOrder)
     const [moneyBack, setMoneyBack] = useState("")
     const [refreshing, setRefreshing] = useState(false)
+    const [loaded, setLoaded] = useState(false)
+
 
     const handleGetItensCart = useCallback(() => {
         api.get(`users/${props.id}/cart`).then(response => {
@@ -73,11 +76,31 @@ function Cart(props: Props) {
             } else {
                 setProducts([])
                 setOrder(initialStateOrder)
+                setAddress("")
+                setPaymentType("")
+                setMoneyBack("")
             }
         })
     }, [])
 
     function handleWhatsApp() {
+        if (!address.trim() || !paymentType.trim()) {
+            Alert.alert("Oops", "Campos inválidos")
+            return
+        }
+        if (paymentType === "Dinheiro") {
+            if (!moneyBack.trim()) {
+                Alert.alert("Oops", "Você deve preencher o valor para troco.")
+                return
+            } else if (!Number(moneyBack)) {
+                Alert.alert("Oops", "Você deve digitar um valor válido.")
+                return
+            } else if (Number(moneyBack) < order.total) {
+                Alert.alert("Oops", "Valor de troco muito baixo.")
+                return
+            }
+        }
+
         let message = `Meu pedido *${order.id}*`
 
         products.forEach(product => {
@@ -120,15 +143,24 @@ function Cart(props: Props) {
         setRefreshing(true)
 
         handleGetItensCart()
-        wait(1000).then(() => setRefreshing(false));
+        wait(1000).then(() => {
+            setRefreshing(false)
+        });
 
     }
+
+    useFocusEffect(() => {
+        if(!loaded) {
+            handleRefresh()
+            setLoaded(true)
+        }
+    })
 
     if (products.length === 0 && order.id === -1) {
         return (
             <ScrollView 
                 style={styles.container}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={["#d69d00"]} />}
             >
                 <View style={styles.cartEmptyContent}> 
                     <Ionicons name="ios-arrow-down" size={30} color="#d6d5d5" />
@@ -143,7 +175,7 @@ function Cart(props: Props) {
     return (
         <ScrollView 
             style={styles.container}
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={["#d69d00"]} />}
         >
             
             <Text style={styles.subtitle}>Resumo dos pedidos</Text>

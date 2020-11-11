@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Alert, Image, Platform, StatusBar, StyleSheet, Text, View } from 'react-native'
-import { Ionicons, FontAwesome } from '@expo/vector-icons'; 
+import { Ionicons, FontAwesome, Feather } from '@expo/vector-icons'; 
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { connect, ConnectedProps } from 'react-redux';
@@ -141,7 +141,7 @@ function BurgerDetail(props: Props) {
                         onPress={() => setAmount(amount + 1)}
                         activeOpacity={0.8}
                     >
-                        <Text style={styles.buttonAmountText}>+</Text>
+                        <Feather name="plus" color="white" size={20} />
                     </TouchableOpacity>
                     <Text style={styles.amount}>{amount}</Text>
                     <TouchableOpacity
@@ -149,7 +149,7 @@ function BurgerDetail(props: Props) {
                         onPress={() => amount > 0 && setAmount(amount - 1)}
                         activeOpacity={0.8}
                     >
-                        <Text style={styles.buttonAmountText}>-</Text>
+                        <Feather name="minus" color="white" size={20} />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -246,10 +246,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 5
-    },
-    buttonAmountText: {
-        color: 'white',
-        fontWeight: 'bold'
     },
     amount: {
         marginHorizontal: 15,
